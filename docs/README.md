@@ -49,6 +49,13 @@
 - [7.8. Авторизация и аутентификация](diagrams/sequence/sequence-7.8-auth.md)
 - [7.9. Управление пользователями](diagrams/sequence/sequence-7.9-user-management.md)
 
+### Тестирование
+- [index.md – Индекс документации по тестированию](testing/README.md)
+- [testing-strategy.md – Стратегия тестирования](testing/testing-strategy.md)
+- [test-types.md – Виды тестов](testing/test-types.md)
+- [testing-tools.md – Инструменты для тестирования](testing/testing-tools.md)
+- [test-plan.md – План тестирования](testing/test-plan.md)
+
 ### Требования к решению (SRS)
 - [00-intro.md – Введение в требования](srs/00-intro.md)
 - [01-users-and-roles.md – Модель пользователей и их ролей](srs/01-users-and-roles.md)
@@ -102,15 +109,3 @@
 Текущая версия: 1.1.0
 
 Для получения информации о последних изменениях см. [CHANGELOG.md](CHANGELOG.md).
-
-# Содержание sequence-диаграмм
-
-- [7.1. Тап – начисление очков игроку](sequence-7.1-tap.md)
-- [7.2. Игнорирование начисления очков для указанных пользователей](sequence-7.2-ignore-user.md)
-- [7.3. Старт и завершение раунда](sequence-7.3-start-end-round.md)
-- [7.4. Настройка игнорируемых пользователей](sequence-7.4-edit-ignored-users.md)
-- [7.5. Запрет тапов вне активного раунда](sequence-7.5-tap-outside-active.md)
-- [7.6. Масштабируемость и консистентность](sequence-7.6-scalability.md)
-- [7.7. Доступ к статистике и истории](sequence-7.7-stats-history.md)
-- [7.8. Авторизация и аутентификация](sequence-7.8-auth.md)
-- [7.9. Управление пользователями](sequence-7.9-user-management.md)
