@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # Изменения для продакшн
+  backend:
+    environment:
+      - NODE_ENV=production
+      - DB_SYNCHRONIZE=false
+      - DB_LOGGING=false
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`api.example.com`)"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls=true"
+
+  # Убираем внешние порты, так как доступ будет через Traefik
+  prometheus:
+    ports: []
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prometheus.rule=Host(`prometheus.example.com`)"
+      - "traefik.http.routers.prometheus.entrypoints=websecure"
+      - "traefik.http.routers.prometheus.tls=true"
+
+  grafana:
+    ports: []
+    environment:
+      - GF_SERVER_ROOT_URL=https://grafana.example.com
+    labels:
+      - "traefik.enable=true" 
+      - "traefik.http.routers.grafana.rule=Host(`grafana.example.com`)"
+      - "traefik.http.routers.grafana.entrypoints=websecure"
+      - "traefik.http.routers.grafana.tls=true"
+
+  kibana:
+    ports: []
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.kibana.rule=Host(`kibana.example.com`)"
+      - "traefik.http.routers.kibana.entrypoints=websecure"
+      - "traefik.http.routers.kibana.tls=true"
+
+  # Добавляем Traefik только для продакшн
+  traefik:
+    image: traefik:v2.5
+    restart: always
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.myresolver.acme.email=${TRAEFIK_ACME_EMAIL:-admin@example.com}"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_data:/letsencrypt
+
+volumes:
+  traefik_data:
