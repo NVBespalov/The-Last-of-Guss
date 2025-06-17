@@ -1,41 +1,39 @@
-# Changelog
+# Журнал изменений
 
-Все значимые изменения в этом проекте будут документироваться в этом файле.
+Все значимые изменения в проекте "The Last of Guss" будут документироваться в этом файле.
 
-Формат основан на [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
+и этот проект придерживается [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Документация
+## [Не выпущено]
 
-### [1.0.0] - 2025-06-17
+### Добавлено
+- Создано подробное руководство по развертыванию (`guides/deployment-guide.md`)
+  - Подробные инструкции для локальной, тестовой и продакшн-сред
+  - Настройка PostgreSQL для различных окружений
+  - Конфигурация WebSocket сервера
+  - Настройка Nginx и SSL для продакшн-среды
+  - Инструкции по мониторингу и логированию
+  - Автоматизация развертывания с помощью CI/CD
+  - Процедуры отката изменений
+  - Решение распространённых проблем при развертывании
+- Обновлен файл журнала изменений (`CHANGELOG.md`)
+  - Систематизирована структура документа
+  - Добавлена информация о новых руководствах
+  - Соблюдение стандарта Keep a Changelog
 
-#### Добавленно
+### Изменено
+- Стандартизирован формат документации
+- Улучшена структура каталогов для документации проекта
 
-- CHANGELOG.md initialization.
-- Added structure and initial content of project documentation in the `docs` folder:
-    - SRS.md — software requirements, links to all sections.
-    - 01-users-and-roles.md — description of user roles (player, nikita, admin).
-    - 02-entities.md — description of domain entities (user, round, score).
-    - 03-rounds-and-cooldown.md — rules for rounds and cooldown (see SRS).
-    - 04-score-calculation.md — rules for score calculation and ignoring.
-    - 05-exceptions.md — description of exception handling.
-    - 06-multiservers-and-db.md — support for multiple backend servers and shared DB.
-    - 07-user-stories.md — key User Stories and acceptance criteria.
-    - 08-non-functional-requirements.md — non-functional requirements.
-    - 09-constraints.md — fixed constraints.
-    - 10-mvp-and-priorities.md — minimum viable product and priorities.
+### Исправлено
+- Исправлены ссылки на репозиторий проекта во всех документах
 
-### Changed
+## [0.1.0] - 2025-06-15
 
-- Initial revision of architecture description, error standards, exceptions and business logic in the `docs` folder.
-
-## Product
-
-### [0.1.0] - 2025-06-17
-
-#### Added
-
-- Initial project setup
-
-[1.0.0]: /docs/
-
-[0.1.0]: ./
+### Добавлено
+- Инициализация монорепозитория
+- Настройка структуры проекта с отдельными папками для фронтенда и бэкенда
+- Базовая настройка CI/CD через GitHub Actions
+- Первоначальная настройка PostgreSQL
+- Реализация базовой архитектуры WebSocket соединений
