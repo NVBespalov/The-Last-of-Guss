@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 2,
+  "id": 3,
   "links": [],
   "panels": [
     {
@@ -64,35 +64,17 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "app_memory_usage_bytes{type=\"heapUsed\"}",
+          "expr": "node_event_loop_lag_seconds",
           "interval": "",
-          "legendFormat": "Heap Used",
+          "legendFormat": "Event Loop Lag",
           "refId": "A"
-        },
-        {
-          "expr": "app_memory_usage_bytes{type=\"heapTotal\"}",
-          "interval": "",
-          "legendFormat": "Heap Total",
-          "refId": "B"
-        },
-        {
-          "expr": "app_memory_usage_bytes{type=\"rss\"}",
-          "interval": "",
-          "legendFormat": "RSS",
-          "refId": "C"
-        },
-        {
-          "expr": "app_memory_usage_bytes{type=\"external\"}",
-          "interval": "",
-          "legendFormat": "External",
-          "refId": "D"
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Memory Usage",
+      "title": "Event Loop Lag",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -108,7 +90,7 @@
       },
       "yaxes": [
         {
-          "format": "bytes",
+          "format": "s",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -175,17 +157,23 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "app_cpu_usage_percent",
+          "expr": "node_gc_duration_seconds{gc_type=\"scavenge\"}",
           "interval": "",
-          "legendFormat": "CPU Usage",
+          "legendFormat": "Scavenge GC",
           "refId": "A"
+        },
+        {
+          "expr": "node_gc_duration_seconds{gc_type=\"mark_sweep_compact\"}",
+          "interval": "",
+          "legendFormat": "Major GC",
+          "refId": "B"
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "CPU Usage",
+      "title": "Garbage Collection Duration",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -201,7 +189,7 @@
       },
       "yaxes": [
         {
-          "format": "percent",
+          "format": "s",
           "label": null,
           "logBase": 1,
           "max": null,
@@ -268,9 +256,9 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "http_request_duration_seconds_sum / http_request_duration_seconds_count",
+          "expr": "rate(db_query_duration_seconds_sum[1m]) / rate(db_query_duration_seconds_count[1m])",
           "interval": "",
-          "legendFormat": "Average Response Time",
+          "legendFormat": "Average DB Query Time",
           "refId": "A"
         }
       ],
@@ -278,7 +266,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "HTTP Request Duration",
+      "title": "Database Query Duration",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -361,17 +349,23 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "app_active_connections",
+          "expr": "rate(auth_attempts_total{status=\"success\"}[1m])",
           "interval": "",
-          "legendFormat": "Active WebSocket Connections",
+          "legendFormat": "Successful Auth ({{method}})",
           "refId": "A"
+        },
+        {
+          "expr": "rate(auth_attempts_total{status=\"failure\"}[1m])",
+          "interval": "",
+          "legendFormat": "Failed Auth ({{method}})",
+          "refId": "B"
         }
       ],
       "thresholds": [],
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "WebSocket Connections",
+      "title": "Authentication Rate",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -407,233 +401,6 @@
         "align": false,
         "alignLevel": null
       }
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "s"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 0,
-        "y": 16
-      },
-      "id": 10,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "text": {},
-        "textMode": "auto"
-      },
-      "pluginVersion": "7.5.7",
-      "targets": [
-        {
-          "expr": "app_uptime_seconds",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        }
-      ],
-      "title": "Application Uptime",
-      "type": "stat"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "percent"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 6,
-        "y": 16
-      },
-      "id": 12,
-      "options": {
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "text": {}
-      },
-      "pluginVersion": "7.5.7",
-      "targets": [
-        {
-          "expr": "app_cpu_usage_percent",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        }
-      ],
-      "title": "Current CPU Usage",
-      "type": "gauge"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 200000000
-              },
-              {
-                "color": "red",
-                "value": 500000000
-              }
-            ]
-          },
-          "unit": "bytes"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 12,
-        "y": 16
-      },
-      "id": 14,
-      "options": {
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "text": {}
-      },
-      "pluginVersion": "7.5.7",
-      "targets": [
-        {
-          "expr": "app_memory_usage_bytes{type=\"heapUsed\"}",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        }
-      ],
-      "title": "Current Heap Usage",
-      "type": "gauge"
-    },
-    {
-      "datasource": "Prometheus",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 18,
-        "y": 16
-      },
-      "id": 16,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "text": {},
-        "textMode": "auto"
-      },
-      "pluginVersion": "7.5.7",
-      "targets": [
-        {
-          "expr": "sum(http_requests_total)",
-          "interval": "",
-          "legendFormat": "",
-          "refId": "A"
-        }
-      ],
-      "title": "Total Requests",
-      "type": "stat"
     }
   ],
   "refresh": "5s",
@@ -649,7 +416,7 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "System Metrics",
-  "uid": "system-metrics",
+  "title": "Node.js Detailed Metrics",
+  "uid": "nodejs-detailed",
   "version": 1
 }

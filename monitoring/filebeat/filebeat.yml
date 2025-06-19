@@ -1,0 +1,16 @@
+# monitoring/filebeat/filebeat.yml
+filebeat.inputs:
+  - type: log
+    enabled: true
+    paths:
+      - /app/logs/*.log
+    json.keys_under_root: true
+    json.message_key: message
+    json.add_error_key: true
+
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+  index: "nest-logs-%{+yyyy.MM.dd}"
+
+setup.template.name: "nest-logs"
+setup.template.pattern: "nest-logs-*"

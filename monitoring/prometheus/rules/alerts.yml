@@ -1,0 +1,38 @@
+groups:
+  - name: instance_alerts
+    rules:
+      - alert: HighCpuUsage
+        expr: app_cpu_usage_percent > 80
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Высокая нагрузка на CPU"
+          description: "CPU использование превышает 80% последние 2 минуты (текущее значение: {{ $value }}%)"
+
+      - alert: HighMemoryUsage
+        expr: app_memory_usage_bytes{type="heapUsed"} / app_memory_usage_bytes{type="heapTotal"} > 0.85
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Высокое использование памяти"
+          description: "Использование памяти превышает 85% последние 2 минуты"
+
+      - alert: HighDatabaseConnections
+        expr: pg_stat_activity_count > 100
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Большое количество подключений к БД"
+          description: "Количество подключений к базе данных превышает 100 (текущее значение: {{ $value }})"
+
+      - alert: HighErrorRate
+        expr: sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m])) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Высокий уровень ошибок API"
+          description: "Уровень ошибок 5xx превышает 5% последние 2 минуты"
