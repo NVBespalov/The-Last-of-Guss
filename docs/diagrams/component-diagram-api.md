@@ -33,22 +33,32 @@ API Gateway служит единой точкой входа для всех к
 
 ## Диаграмма компонентов API
 ```mermaid
- graph TD 
- Client[Клиент] --> Gateway[API Gateway] Gateway --> Auth[Auth API] Gateway --> Rounds[Rounds API] Gateway --> Taps[Taps API] Gateway --> Stats[Stats API] Gateway --> Admin[Admin API] Gateway --> WSHandler[WebSocket Handler]
-Auth --> UserService[Сервис пользователей]
-Rounds --> RoundService[Сервис раундов]
-Taps --> ScoreService[Сервис подсчета очков]
-Stats --> AnalyticsService[Сервис аналитики]
-Admin --> AdminService[Административный сервис]
+graph TD
+    Client[Клиент] --> Gateway[API Gateway]
 
-WSHandler --> NotificationService[Сервис уведомлений]
+    Gateway --> Auth[Auth API]
+    Gateway --> Rounds[Rounds API]
+    Gateway --> Taps[Taps API]
+    Gateway --> Stats[Stats API]
+    Gateway --> Admin[Admin API]
+    Gateway --> WSHandler[WebSocket Handler]
 
-UserService --> DB[(База данных)]
-RoundService --> DB
-ScoreService --> DB
-AnalyticsService --> DB
-AdminService --> DB
-NotificationService --> WSBroker[WebSocket Брокер]
+    Auth --> UserService[Сервис пользователей]
+    Rounds --> RoundService[Сервис раундов]
+    Taps --> ScoreService[Сервис подсчета очков]
+    Stats --> AnalyticsService[Сервис аналитики]
+    Admin --> AdminService[Административный сервис]
+
+    WSHandler --> NotificationService[Сервис уведомлений]
+
+    UserService --> DB[(База данных)]
+    RoundService --> DB
+    ScoreService --> DB
+    AnalyticsService --> DB
+    AdminService --> DB
+
+    NotificationService --> WSBroker[WebSocket Брокер]
+
 ``` 
 
 ## Архитектурные принципы API
