@@ -120,7 +120,7 @@ function UserProfile(props) {
 
 - Используйте PascalCase для компонентов: `UserCard.tsx`, `ProfilePage.tsx`
 - Используйте kebab-case для обычных файлов: `use-auth.ts`, `api-config.ts`
-- Используйте индексные файлы для экспорта: `index.ts`
+- Используйте индексные файлы для экспорта: `index.tsx`
 
 #### Компоненты
 
