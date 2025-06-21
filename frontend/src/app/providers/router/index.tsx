@@ -5,13 +5,16 @@ import { CssBaseline } from '@mui/material'
 import { store } from '../store'
 import { theme } from '../theme'
 import { router } from './config'
+import {WebSocketProvider} from "@app/providers/websocket";
 
 export function Providers() {
     return (
         <Provider store={store}>
             <ThemeProvider theme={theme}>
                 <CssBaseline />
-                <RouterProvider router={router} />
+                <WebSocketProvider>
+                    <RouterProvider router={router} />
+                </WebSocketProvider>
             </ThemeProvider>
         </Provider>
     )

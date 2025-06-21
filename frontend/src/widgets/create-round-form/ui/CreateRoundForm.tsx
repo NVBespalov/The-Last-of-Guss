@@ -27,12 +27,18 @@ import {
 import { roundFormSchema, type RoundFormData, type CreateRoundData } from '@/features';
 import { createRound, clearError, resetState } from '@/features';
 import { AppDispatch, RootState } from "@app/providers/store";
+import {useRoundEvents} from "@features/round-management/lib/use-round-event.ts";
+import {ConnectionStatus} from "@/shared";
+
 
 export const CreateRoundForm: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
 
     const { isCreating, error, createdRound } = useSelector((state: RootState) => state.createRound);
+    
+    // Подключаем WebSocket события
+    const { isConnected } = useRoundEvents();
 
     const {
         handleSubmit,
@@ -93,13 +99,17 @@ export const CreateRoundForm: React.FC = () => {
     return (
         <Box sx={{ maxWidth: 800, mx: 'auto', p: 3 }}>
             <Paper elevation={3} sx={{ p: 4 }}>
-                <Typography variant="h4" component="h1" gutterBottom>
-                    Создание нового раунда
-                </Typography>
-
-                <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-                    Заполните информацию для создания нового игрового раунда
-                </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
+                    <Box>
+                        <Typography variant="h4" component="h1" gutterBottom>
+                            Создание нового раунда
+                        </Typography>
+                        <Typography variant="body1" color="text.secondary">
+                            Заполните информацию для создания нового игрового раунда
+                        </Typography>
+                    </Box>
+                    <ConnectionStatus />
+                </Box>
 
                 {error && (
                     <Alert severity="error" sx={{ mb: 3 }} onClose={() => dispatch(clearError())}>
