@@ -54,10 +54,10 @@ export function RoundCard({ round }: RoundCardProps) {
 
                 <Box sx={{ mb: 2 }}>
                     <Typography variant="body2">
-                        Start: {formatDate(round.startDate)}
+                        Start: {formatDate(round.startTime)}
                     </Typography>
                     <Typography variant="body2">
-                        End: {formatDate(round.endDate)}
+                        End: {formatDate(round.endTime)}
                     </Typography>
                 </Box>
 

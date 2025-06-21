@@ -1,4 +1,4 @@
-import { Round, RoundStats } from '../../../entities/round'
+import { Round, RoundStats } from '@/entities'
 
 export interface GameState {
     currentRound: Round | null
@@ -14,6 +14,6 @@ export interface TapResponse {
     totalTaps: number
 }
 
-export interface RoundDetailsResponse extends Round {
-    stats: RoundStats
+export interface RoundDetailsResponse {
+    data: Round
 }

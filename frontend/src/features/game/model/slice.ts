@@ -14,7 +14,8 @@ export const fetchRoundDetails = createAsyncThunk<RoundDetailsResponse, string>(
     'game/fetchRoundDetails',
     async (roundId, { rejectWithValue }) => {
         try {
-            return await gameApi.getRoundDetails(roundId)
+            const response = await gameApi.getRoundDetails(roundId);
+            return response?.data
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || 'Ошибка загрузки раунда')
         }

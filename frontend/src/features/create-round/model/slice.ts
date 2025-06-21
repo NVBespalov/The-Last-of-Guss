@@ -1,7 +1,7 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import type { Round } from '@entities/round';
-import type { CreateRoundData } from '@/features';
-import { roundApi } from '@/features';
+import {createAsyncThunk, createSlice} from '@reduxjs/toolkit';
+import type {Round} from '@entities/round';
+import type {CreateRoundData} from '@/features';
+import {roundApi} from '@/features';
 
 export interface CreateRoundState {
     isCreating: boolean;
@@ -19,8 +19,7 @@ export const createRound = createAsyncThunk(
     'createRound/createRound',
     async (data: CreateRoundData, { rejectWithValue }) => {
         try {
-            const response = await roundApi.createRound(data);
-            return response;
+            return await roundApi.createRound(data);
         } catch (error: any) {
             return rejectWithValue(error.message || 'Ошибка при создании раунда');
         }

@@ -1,7 +1,7 @@
 import { Typography, Box } from '@mui/material'
 import { Round } from '../model'
-import { formatTime } from '../../../shared/lib'
-import { useCountdown } from '../../../shared/lib/hooks'
+import { formatTime } from '@/shared'
+import { useCountdown } from '@/shared'
 
 interface RoundStatusProps {
     round: Round
@@ -9,7 +9,7 @@ interface RoundStatusProps {
 }
 
 export function RoundStatus({ round, onStatusChange }: RoundStatusProps) {
-    const targetDate = round.status === 'active' ? round.endDate : round.startDate
+    const targetDate = round.status === 'active' ? round.endTime : round.startTime
     const timeLeft = useCountdown(targetDate, onStatusChange)
 
     const getStatusText = () => {

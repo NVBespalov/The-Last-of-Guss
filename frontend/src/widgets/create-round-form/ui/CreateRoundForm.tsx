@@ -19,9 +19,6 @@ import {
 } from '@mui/material';
 import {
     AccessTime,
-    Group,
-    Title,
-    Description,
 } from '@mui/icons-material';
 
 import { roundFormSchema, type RoundFormData, type CreateRoundData } from '@/features';
@@ -48,10 +45,8 @@ export const CreateRoundForm: React.FC = () => {
     } = useForm<RoundFormData>({
         resolver: yupResolver(roundFormSchema),
         defaultValues: {
-            name: '',
-            startDate: '',
+            startTime: '',
             duration: 30,
-            maxParticipants: 100,
         },
         mode: 'onChange',
     });
@@ -70,15 +65,11 @@ export const CreateRoundForm: React.FC = () => {
     }, [createdRound, reset, navigate]);
 
     const onSubmit = (data: RoundFormData) => {
-        const startDateTime = new Date(data.startDate);
-        const endDateTime = new Date(startDateTime.getTime() + data.duration * 60 * 1000);
+        const startDateTime = new Date(data.startTime);
 
         const createData: CreateRoundData = {
-            name: data.name,
-            description: data.description || undefined,
-            startDate: startDateTime.toISOString(),
-            endDate: endDateTime.toISOString(),
-            maxParticipants: data.maxParticipants && data.maxParticipants > 0 ? data.maxParticipants : undefined,
+            startTime: startDateTime.toISOString(),
+            duration: data.duration,
         };
 
         dispatch(createRound(createData));
@@ -118,59 +109,10 @@ export const CreateRoundForm: React.FC = () => {
 
                 <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
                     <Grid container spacing={3}>
-                        <Grid component="div" sx={{ mb: 2, width: '100%' }}>
-                            <Controller
-                                name="name"
-                                control={control}
-                                render={({ field }) => (
-                                    <TextField
-                                        {...field}
-                                        fullWidth
-                                        label="Название раунда"
-                                        placeholder="Введите название раунда"
-                                        error={!!errors.name}
-                                        helperText={errors.name?.message}
-                                        InputProps={{
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <Title />
-                                                </InputAdornment>
-                                            ),
-                                        }}
-                                    />
-                                )}
-                            />
-                        </Grid>
 
-                        <Grid component="div" sx={{ mb: 2, width: '100%' }}>
+                        <Grid component="div" sx={{width: '48%'}}>
                             <Controller
-                                name="description"
-                                control={control}
-                                render={({ field }) => (
-                                    <TextField
-                                        {...field}
-                                        fullWidth
-                                        multiline
-                                        rows={3}
-                                        label="Описание (необязательно)"
-                                        placeholder="Опишите правила или особенности раунда"
-                                        error={!!errors.description}
-                                        helperText={errors.description?.message}
-                                        InputProps={{
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <Description />
-                                                </InputAdornment>
-                                            ),
-                                        }}
-                                    />
-                                )}
-                            />
-                        </Grid>
-
-                        <Grid component="div" sx={{width: '31%'}}>
-                            <Controller
-                                name="startDate"
+                                name="startTime"
                                 control={control}
                                 render={({ field }) => (
                                     <TextField
@@ -178,8 +120,8 @@ export const CreateRoundForm: React.FC = () => {
                                         fullWidth
                                         type="datetime-local"
                                         label="Время начала"
-                                        error={!!errors.startDate}
-                                        helperText={errors.startDate?.message}
+                                        error={!!errors.startTime}
+                                        helperText={errors.startTime?.message}
                                         InputLabelProps={{
                                             shrink: true,
                                         }}
@@ -191,7 +133,7 @@ export const CreateRoundForm: React.FC = () => {
                             />
                         </Grid>
 
-                        <Grid component="div" sx={{ mb: 2, width: '31%' }}>
+                        <Grid component="div" sx={{ mb: 2, width: '48%' }}>
                             <Controller
                                 name="duration"
                                 control={control}
@@ -226,40 +168,6 @@ export const CreateRoundForm: React.FC = () => {
                                 )}
                             />
                         </Grid>
-
-                        <Grid component="div" sx={{ mb: 2, width: '31%' }}>
-                            <Controller
-                                name="maxParticipants"
-                                control={control}
-                                render={({ field }) => (
-                                    <FormControl fullWidth error={!!errors.maxParticipants}>
-                                        <InputLabel htmlFor="participants-input">Макс. участников</InputLabel>
-                                        <OutlinedInput
-                                            {...field}
-                                            id="participants-input"
-                                            type="number"
-                                            label="Макс. участников"
-                                            placeholder="100"
-                                            inputProps={{
-                                                min: 1,
-                                                max: 1000,
-                                            }}
-                                            startAdornment={
-                                                <InputAdornment position="start">
-                                                    <Group />
-                                                </InputAdornment>
-                                            }
-                                        />
-                                        {errors.maxParticipants && (
-                                            <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.5 }}>
-                                                {errors.maxParticipants.message}
-                                            </Typography>
-                                        )}
-                                    </FormControl>
-                                )}
-                            />
-                        </Grid>
-
                         <Grid component="div" sx={{ mb: 2, width: '100%' }}>
                             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 2 }}>
                                 <Button

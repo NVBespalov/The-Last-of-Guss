@@ -14,7 +14,6 @@ class WebSocketService {
 
         return new Promise((resolve, reject) => {
             try {
-                debugger
                 this.socket = io.connect(config.url, {
                     auth: config.auth,
                     transports: ['websocket'],
