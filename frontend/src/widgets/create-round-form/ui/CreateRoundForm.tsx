@@ -27,7 +27,7 @@ import {
 import { roundFormSchema, type RoundFormData, type CreateRoundData } from '@/features';
 import { createRound, clearError, resetState } from '@/features';
 import { AppDispatch, RootState } from "@app/providers/store";
-import {useRoundEvents} from "@features/round-management/lib/use-round-event.ts";
+// import {useRoundEvents} from "@features/round-management/lib/use-round-event.ts";
 import {ConnectionStatus} from "@/shared";
 
 
@@ -38,7 +38,7 @@ export const CreateRoundForm: React.FC = () => {
     const { isCreating, error, createdRound } = useSelector((state: RootState) => state.createRound);
     
     // Подключаем WebSocket события
-    const { isConnected } = useRoundEvents();
+    // const { isConnected } = useRoundEvents();
 
     const {
         handleSubmit,
@@ -49,7 +49,6 @@ export const CreateRoundForm: React.FC = () => {
         resolver: yupResolver(roundFormSchema),
         defaultValues: {
             name: '',
-            description: '',
             startDate: '',
             duration: 30,
             maxParticipants: 100,
