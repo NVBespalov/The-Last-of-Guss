@@ -3,7 +3,6 @@
 interface ImportMetaEnv {
     readonly VITE_PORT: string
     readonly VITE_HOST: string
-    readonly VITE_API_URL: string
     readonly VITE_API_BASE_URL: string
     readonly VITE_JWT_SECRET: string
     readonly VITE_JWT_EXPIRES_IN: string

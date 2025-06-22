@@ -15,17 +15,15 @@ import {
 import { LoginDto } from './dto/login.dto';
 import { AuthService, UsersService } from '@ThLOG/auth/services';
 import { CurrentUser, Public } from '@ThLOG/auth/decorators';
-import { JwtAuthGuard, LocalAuthGuard } from '@ThLOG/auth/guards';
+import { JwtAuthGuard } from '@ThLOG/auth/guards';
 import { HttpExceptionFilter } from '@ThLOG/common/filters';
-import { RefreshTokenDto, RegisterDto } from '@ThLOG/auth/dto';
+import { RefreshTokenDto } from '@ThLOG/auth/dto';
 import { JwtPayload } from '@ThLOG/auth/utils';
 import { RefreshTokenCookieInterceptor } from '@ThLOG/auth/interceptors';
 import { Roles } from '@ThLOG/auth/decorators/roles.decorator';
 import {
   ApiBearerAuth,
   ApiBody,
-  ApiConflictResponse,
-  ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiOkResponse,
   ApiOperation,
@@ -47,7 +45,6 @@ export class AuthController {
   ) {}
 
   @Public()
-  @UseGuards(LocalAuthGuard)
   @Post('login')
   @UseInterceptors(RefreshTokenCookieInterceptor)
   @HttpCode(HttpStatus.OK)
@@ -88,51 +85,6 @@ export class AuthController {
   @ApiUnauthorizedResponse({ description: 'Неверные учетные данные' })
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
-  }
-
-  @Public()
-  @Post('register')
-  @UseInterceptors(RefreshTokenCookieInterceptor)
-  @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Регистрация нового пользователя' })
-  @ApiBody({ type: RegisterDto })
-  @ApiCreatedResponse({
-    description: 'Пользователь успешно зарегистрирован',
-    schema: {
-      type: 'object',
-      properties: {
-        success: { type: 'boolean', example: true },
-        data: {
-          type: 'object',
-          properties: {
-            accessToken: {
-              type: 'string',
-              example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-            },
-            refreshToken: {
-              type: 'string',
-              example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-            },
-            user: {
-              type: 'object',
-              properties: {
-                id: { type: 'number', example: 1 },
-                email: { type: 'string', example: 'user@example.com' },
-                name: { type: 'string', example: 'Иван Иванов' },
-                role: { type: 'string', example: 'user' },
-              },
-            },
-          },
-        },
-        timestamp: { type: 'string', example: '2025-06-18T12:00:00.000Z' },
-      },
-    },
-  })
-  @ApiConflictResponse({
-    description: 'Пользователь с таким email уже существует',
-  })
-  async register(@Body() registerDto: RegisterDto) {
-    return this.authService.register(registerDto);
   }
 
   @Public()

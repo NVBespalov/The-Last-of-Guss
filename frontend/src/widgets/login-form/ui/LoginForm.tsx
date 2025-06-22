@@ -1,22 +1,22 @@
-import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { yupResolver } from '@hookform/resolvers/yup'
-import { Box, Paper, Typography, Alert } from '@mui/material'
-import { useNavigate } from 'react-router-dom'
-import { useAppDispatch, useAppSelector } from '../../../shared/lib'
-import { loginUser, clearError } from '../../../features/auth'
-import { loginSchema, LoginFormData } from '../../../features/auth'
-import { Input, Button } from '../../../shared/ui'
+import {useEffect} from 'react'
+import {useForm} from 'react-hook-form'
+import {yupResolver} from '@hookform/resolvers/yup'
+import {Box, Paper, Typography, Alert} from '@mui/material'
+import {useNavigate} from 'react-router-dom'
+import {useAppDispatch, useAppSelector, useWebSocket} from '@/shared'
+import {loginUser, clearError} from '@/features'
+import {loginSchema, LoginFormData} from '@/features'
+import {Input, Button} from '@/shared'
 
 export function LoginForm() {
     const dispatch = useAppDispatch()
     const navigate = useNavigate()
-    const { loading, error, isAuthenticated } = useAppSelector((state) => state.auth)
-
+    const {loading, error, isAuthenticated} = useAppSelector((state) => state.auth)
+    const {reconnect} = useWebSocket()
     const {
         register,
         handleSubmit,
-        formState: { errors },
+        formState: {errors},
     } = useForm<LoginFormData>({
         resolver: yupResolver(loginSchema),
     })
@@ -33,8 +33,20 @@ export function LoginForm() {
         }
     }, [dispatch])
 
-    const onSubmit = (data: LoginFormData) => {
-        dispatch(loginUser(data))
+    const onSubmit = async (data: LoginFormData) => {
+        const resultAction = await dispatch(loginUser(data));
+
+        // Проверяем статус выполнения
+        if (loginUser.fulfilled.match(resultAction)) {
+            // Действие успешно выполнено, можно продолжать
+            await reconnect();
+        } else if (loginUser.rejected.match(resultAction)) {
+            // Действие завершилось с ошибкой
+            console.error('Ошибка входа:', resultAction.payload);
+            // Здесь можно добавить обработку ошибки
+        }
+
+
     }
 
     return (
@@ -54,7 +66,7 @@ export function LoginForm() {
                     maxWidth: 400,
                 }}
             >
-                <Typography variant="h4" align="center" sx={{ mb: 3 }}>
+                <Typography variant="h4" align="center" sx={{mb: 3}}>
                     ВОЙТИ
                 </Typography>
 
@@ -77,12 +89,12 @@ export function LoginForm() {
                     />
 
                     {error && (
-                        <Alert severity="error" sx={{ mt: 2 }}>
+                        <Alert severity="error" sx={{mt: 2}}>
                             {error}
                         </Alert>
                     )}
 
-                    <Box sx={{ mt: 3 }}>
+                    <Box sx={{mt: 3}}>
                         <Button type="submit" disabled={loading}>
                             {loading ? 'Вход...' : 'Войти'}
                         </Button>

@@ -1,4 +1,4 @@
-import React, {createContext, useEffect, useState, ReactNode, useCallback} from 'react';
+import React, {createContext, useEffect, useState, ReactNode} from 'react';
 import { websocketService } from '@/shared/api/websocket';
 import { WebSocketState } from '@/shared/api/websocket';
 import Socket = SocketIOClient.Socket;
@@ -22,16 +22,10 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     const [isConnected, setIsConnected] = useState(false);
     const [connectionError, setConnectionError] = useState<string | null>(null);
     const [reconnectAttempts, setReconnectAttempts] = useState(0);
-    const [authToken, setAuthToken] = useState<string | null>(localStorage.getItem('token') || null);
-
-    const tokenChangeListener = useCallback((event: StorageEvent) => {
-        if (event.key === 'token') {
-            setAuthToken(event.newValue);
-        }
-    }, []);
 
     const connect = async () => {
-        if (!authToken) {
+        const token = localStorage.getItem('token');
+        if (!token) {
             setConnectionError('Authentication token is missing');
             setIsConnected(false);
             return;
@@ -39,11 +33,10 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
 
         try {
             setConnectionError(null);
-
             const socketInstance = await websocketService.initialize({
                 url: env.WS_URL,
                 auth: {
-                    token: authToken,
+                    token,
                 },
                 reconnection: {
                     maxAttempts: 5,
@@ -73,21 +66,9 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     };
 
     useEffect(() => {
-        if (!authToken) {
-            disconnect();
-            setConnectionError('Authentication token is missing');
-            return;
+        if (localStorage.getItem('token')) {
+            void connect();
         }
-        void connect();
-
-        window.addEventListener('storage', tokenChangeListener);
-        return () => {
-            disconnect();
-            window.removeEventListener('storage', tokenChangeListener);
-        };
-    }, [authToken, tokenChangeListener]);
-
-    useEffect(() => {
         const handleConnect = () => {
             setIsConnected(true);
             setConnectionError(null);

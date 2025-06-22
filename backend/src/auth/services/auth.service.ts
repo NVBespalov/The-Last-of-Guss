@@ -7,9 +7,7 @@ import {
   InvalidCredentialsException,
   InvalidRefreshTokenException,
   RefreshTokenExpiredException,
-  UserAlreadyExistsException,
 } from '@ThLOG/auth/exceptions';
-import { RegisterDto } from '@ThLOG/auth/dto';
 import { ConfigService } from '@nestjs/config';
 import { JwtPayload } from '@ThLOG/auth/utils';
 import { PrometheusService } from '@ThLOG/common/metrics/prometheus.service';
@@ -17,7 +15,6 @@ import { PrometheusService } from '@ThLOG/common/metrics/prometheus.service';
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
-  private authCounter;
 
   constructor(
     private usersService: UsersService,
@@ -70,11 +67,15 @@ export class AuthService {
 
   async login(user: any) {
     try {
-      const dbUser = await this.usersService.findOne(user.username, {
+      let dbUser = await this.usersService.findOne(user.username, {
         select: { password: false },
       });
 
       if (!dbUser) {
+        dbUser = await this.usersService.create(user);
+      }
+
+      if (!bcrypt.compareSync(user.password, dbUser.password)) {
         throw new InvalidCredentialsException();
       }
 
@@ -97,7 +98,6 @@ export class AuthService {
         `Ошибка при входе пользователя: ${error.message}`,
         error.stack,
       );
-      this.authCounter.labels('failure', 'login').inc();
       if (this.prometheusService) {
         this.prometheusService.recordAuthAttempt('failure', 'login');
       }
@@ -121,39 +121,6 @@ export class AuthService {
     } catch (error) {
       this.logger.error(
         `Ошибка при выходе пользователя: ${error.message}`,
-        error.stack,
-      );
-      throw error;
-    }
-  }
-
-  async register(registerDto: RegisterDto) {
-    try {
-      const existingUser = await this.usersService.findOne(
-        registerDto.username,
-      );
-      if (existingUser) {
-        this.logger.warn(
-          `Попытка регистрации с существующим именем пользователя: ${registerDto.username}`,
-        );
-        throw new UserAlreadyExistsException(registerDto.username);
-      }
-
-      // Создаем нового пользователя
-      const user = await this.usersService.create(registerDto);
-
-      this.logger.log(`Пользователь успешно зарегистрирован: ${user.username}`);
-
-      // Возвращаем токен и данные пользователя (без пароля)
-      const { password, ...result } = user;
-      return this.login(result);
-    } catch (error) {
-      if (error instanceof UserAlreadyExistsException) {
-        throw error;
-      }
-
-      this.logger.error(
-        `Ошибка при регистрации пользователя: ${error.message}`,
         error.stack,
       );
       throw error;

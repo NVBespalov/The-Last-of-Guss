@@ -58,7 +58,13 @@ export class UsersService {
       const salt = await bcrypt.genSalt();
       user.password = await bcrypt.hash(registerDto.password, salt);
 
-      user.role = UserRole.ADMIN;
+      if (user.username === 'Никита') {
+        user.role = UserRole.NIKITA;
+      } else if (user.username === 'admin') {
+        user.role = UserRole.ADMIN;
+      } else {
+        user.role = UserRole.SURVIVOR;
+      }
 
       return this.usersRepository.save(user);
     } catch (error) {

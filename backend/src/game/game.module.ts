@@ -6,6 +6,7 @@ import { User } from '@ThLOG/auth/entities';
 import { TapService } from '@ThLOG/game/tap.service';
 import { GameController } from '@ThLOG/game/game.controller';
 import { AuthModule } from '@ThLOG/auth';
+import { LockService } from '@ThLOG/common/services/lock.service';
 
 @Module({
   imports: [
@@ -13,7 +14,7 @@ import { AuthModule } from '@ThLOG/auth';
     AuthModule,
   ],
   controllers: [GameController],
-  providers: [TapService],
+  providers: [TapService, LockService],
   exports: [TapService],
 })
 export class GameModule {}

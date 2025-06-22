@@ -1,10 +1,15 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Round } from '@ThLOG/round/entities/round.entity';
 import { RoundParticipation } from '@ThLOG/round/entities/round-participations.entity';
 import { User, UserRole } from '@ThLOG/auth/entities';
 import { AppGateway } from '@ThLOG/gateways';
+import { LockService } from '@ThLOG/common/services/lock.service';
 
 export interface TapResult {
   userId: string;
@@ -36,107 +41,119 @@ export class TapService {
     private readonly participationRepository: Repository<RoundParticipation>,
     private readonly dataSource: DataSource,
     private readonly appGateway: AppGateway,
+    private readonly lockService: LockService,
   ) {}
 
   async processTap(userId: string, roundId: string): Promise<TapResult> {
-    // Используем транзакцию для обеспечения консистентности данных
-    const result = await this.dataSource.transaction(async (manager) => {
-      // 1. Проверяем пользователя
-      const user = await manager.findOne(User, { where: { id: userId } });
-      if (!user) {
-        throw new BadRequestException('Пользователь не найден');
-      }
+    const lockKey = `tap:${userId}:${roundId}`;
 
-      // 2. Проверяем раунд и его состояние
-      const round = await manager.findOne(Round, { where: { id: roundId } });
-      if (!round) {
-        throw new BadRequestException('Раунд не найден');
-      }
+    // Пытаемся получить блокировку
+    const lockAcquired = await this.lockService.acquireLock(lockKey, 3000);
+    if (!lockAcquired) {
+      throw new ConflictException('Слишком много тапов, подождите секунду');
+    }
 
-      const now = new Date();
-      if (now < round.startTime) {
-        throw new BadRequestException('Раунд еще не начался');
-      }
-      if (now > round.endTime) {
-        throw new BadRequestException('Раунд уже завершен');
-      }
+    try {
+      const result = await this.dataSource.transaction(async (manager) => {
+        // 1. Проверяем пользователя
+        const user = await manager.findOne(User, { where: { id: userId } });
+        if (!user) {
+          throw new BadRequestException('Пользователь не найден');
+        }
 
-      // 3. Получаем или создаем участие в раунде
-      let participation = await manager.findOne(RoundParticipation, {
-        where: { userId, roundId },
-      });
+        // 2. Проверяем раунд и его состояние
+        const round = await manager.findOne(Round, { where: { id: roundId } });
+        if (!round) {
+          throw new BadRequestException('Раунд не найден');
+        }
 
-      if (!participation) {
-        participation = manager.create(RoundParticipation, {
+        const now = new Date();
+        if (now < round.startTime) {
+          throw new BadRequestException('Раунд еще не начался');
+        }
+        if (now > round.endTime) {
+          throw new BadRequestException('Раунд уже завершен');
+        }
+
+        // 3. Получаем или создаем участие в раунде
+        let participation = await manager.findOne(RoundParticipation, {
+          where: { userId, roundId },
+        });
+
+        if (!participation) {
+          participation = manager.create(RoundParticipation, {
+            userId,
+            roundId,
+            taps: 0,
+            score: 0,
+          });
+        }
+
+        // 4. Увеличиваем счетчик тапов
+        participation.taps += 1;
+
+        // 5. Рассчитываем очки с учетом правил
+        let pointsToAdd = 1; // базовое очко за тап
+
+        // Каждый 11-й тап дает 10 очков
+        if (participation.taps % 11 === 0) {
+          pointsToAdd = 10;
+        }
+
+        // 6. Проверяем роль пользователя (Никита)
+        const isNikita = user.role === UserRole.NIKITA;
+        let actualScore = participation.score;
+
+        if (!isNikita) {
+          actualScore += pointsToAdd;
+          participation.score = actualScore;
+        }
+        // Для Никиты тапы считаются, но очки не начисляются
+
+        // 7. Сохраняем участие
+        await manager.save(RoundParticipation, participation);
+
+        // 8. Обновляем общий счетчик тапов в раунде
+        await manager.increment(Round, { id: roundId }, 'totalTaps', 1);
+
+        // 9. Обновляем общий счетчик очков в раунде (только для не-Никиты)
+        if (!isNikita) {
+          await manager.increment(
+            Round,
+            { id: roundId },
+            'totalScore',
+            pointsToAdd,
+          );
+        }
+
+        return {
           userId,
           roundId,
-          taps: 0,
-          score: 0,
-        });
-      }
+          taps: participation.taps,
+          score: actualScore,
+          pointsEarned: isNikita ? 0 : pointsToAdd,
+          message: isNikita
+            ? 'Тап засчитан, но очки не начислены (роль Никита)'
+            : undefined,
+          username: user.username,
+        };
+      });
 
-      // 4. Увеличиваем счетчик тапов
-      participation.taps += 1;
-
-      // 5. Рассчитываем очки с учетом правил
-      let pointsToAdd = 1; // базовое очко за тап
-
-      // Каждый 11-й тап дает 10 очков
-      if (participation.taps % 11 === 0) {
-        pointsToAdd = 10;
-      }
-
-      // 6. Проверяем роль пользователя (Никита)
-      const isNikita = user.role === UserRole.NIKITA;
-      let actualScore = participation.score;
-
-      if (!isNikita) {
-        actualScore += pointsToAdd;
-        participation.score = actualScore;
-      }
-      // Для Никиты тапы считаются, но очки не начисляются
-
-      // 7. Сохраняем участие
-      await manager.save(RoundParticipation, participation);
-
-      // 8. Обновляем общий счетчик тапов в раунде
-      await manager.increment(Round, { id: roundId }, 'totalTaps', 1);
-
-      // 9. Обновляем общий счетчик очков в раунде (только для не-Никиты)
-      if (!isNikita) {
-        await manager.increment(
-          Round,
-          { id: roundId },
-          'totalScore',
-          pointsToAdd,
-        );
-      }
+      // Отправляем обновления через WebSocket после успешной транзакции
+      this.broadcastTapUpdate(result);
+      await this.broadcastRoundStatsUpdate(roundId);
 
       return {
-        userId,
-        roundId,
-        taps: participation.taps,
-        score: actualScore,
-        pointsEarned: isNikita ? 0 : pointsToAdd,
-        message: isNikita
-          ? 'Тап засчитан, но очки не начислены (роль Никита)'
-          : undefined,
-        username: user.username,
+        userId: result.userId,
+        roundId: result.roundId,
+        taps: result.taps,
+        score: result.score,
+        pointsEarned: result.pointsEarned,
+        message: result.message,
       };
-    });
-
-    // Отправляем обновления через WebSocket после успешной транзакции
-    await this.broadcastTapUpdate(result);
-    await this.broadcastRoundStatsUpdate(roundId);
-
-    return {
-      userId: result.userId,
-      roundId: result.roundId,
-      taps: result.taps,
-      score: result.score,
-      pointsEarned: result.pointsEarned,
-      message: result.message,
-    };
+    } finally {
+      this.lockService.releaseLock(lockKey);
+    }
   }
 
   async getUserStats(

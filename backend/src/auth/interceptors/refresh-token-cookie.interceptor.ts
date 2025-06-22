@@ -20,6 +20,7 @@ export class RefreshTokenCookieInterceptor implements NestInterceptor {
           const response = context.switchToHttp().getResponse();
 
           // Устанавливаем refresh token в cookie
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call
           response.cookie('refresh_token', data.data.refreshToken, {
             httpOnly: true,
             secure: this.configService.get<string>('NODE_ENV') === 'production',

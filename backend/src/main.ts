@@ -3,6 +3,7 @@ import { AppModule } from '@ThLOG//app.module';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpExceptionFilter } from '@ThLOG/common/filters';
+import { Response, Request } from 'express';
 import {
   TransformInterceptor,
   TypeOrmExceptionFilter,
@@ -27,7 +28,7 @@ async function bootstrap() {
   const apiPrefix = configService.getOrThrow<string>('apiPrefix');
 
   app.use(cookieParser());
-  app.use(`/${apiPrefix}/metrics`, async (req, res) => {
+  app.use(`/${apiPrefix}/metrics`, async (req: Request, res: Response) => {
     res.set('Content-Type', 'text/plain');
     const metrics = await prometheusService.getMetrics();
     res.end(metrics);
