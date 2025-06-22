@@ -2,21 +2,17 @@ import {useEffect} from 'react'
 import {Link, Navigate, useParams} from 'react-router-dom'
 import {Alert, Box, Button, CircularProgress} from '@mui/material'
 import {ArrowBack as ArrowBackIcon} from '@mui/icons-material'
-import {useAppDispatch, useAppSelector, useWebSocket} from '@/shared'
-import {useInterval} from '@/shared'
+import {ConnectionStatus, useAppDispatch, useAppSelector, useRoundManager} from '@/shared'
 import {clearCurrentRound, fetchRoundDetails} from '@/features'
-import {RoundStatus} from '@/entities'
+import {Round, RoundStatus} from '@/entities'
 import {GooseGame} from '@/widgets'
-import {ConnectionStatus} from "@/shared";
 
 export function RoundPage() {
     const {id} = useParams<{ id: string }>()
     const dispatch = useAppDispatch()
     const {isAuthenticated, loading: authLoading} = useAppSelector((state) => state.auth)
     const {currentRound, loading, error} = useAppSelector((state) => state.game)
-    const user = useAppSelector((state) => {
-        return state.auth.user;
-    })
+
     useEffect(() => {
         if (id && isAuthenticated) {
             dispatch(fetchRoundDetails(id))
@@ -27,44 +23,17 @@ export function RoundPage() {
         }
     }, [dispatch, id, isAuthenticated]);
 
-    const { isConnected, socket } = useWebSocket();
+    const {
+        joinRound,
+        leaveRound,
+    } = useRoundManager(currentRound || {} as Round)
 
     useEffect(() => {
-        if (!socket) return
-
-
-
-        // Обновление состояния раунда
-        socket.on('round-update', (data: RoundUpdate) => {
-            setRoundState(prev => ({ ...prev, ...data }))
-        })
-
-        // Изменение статуса раунда
-        socket.on('round-status-change', (data: { status: string, winner?: any, totalTaps?: number }) => {
-            setRoundState(prev => ({
-                ...prev,
-                status: normalizeStatus(data.status),
-                winner: data.winner,
-                totalTaps: data.totalTaps || prev.totalTaps
-            }))
-        })
-
+        joinRound()
         return () => {
-            socket.off('tap-update')
-            socket.off('round-update')
-            socket.off('round-status-change')
-            socket.off('timer-update')
-            socket.off('tap-error')
+            leaveRound()
         }
-    }, [socket, user])
-
-
-
-    const handleStatusChange = () => {
-        if (id) {
-            dispatch(fetchRoundDetails(id))
-        }
-    }
+    }, [joinRound, leaveRound, currentRound]);
 
     if (authLoading) {
         return null
@@ -135,7 +104,7 @@ export function RoundPage() {
                 </Button>
             </Box>
             <ConnectionStatus/>
-            <RoundStatus round={currentRound} onStatusChange={handleStatusChange}/>
+            <RoundStatus />
             <GooseGame round={currentRound}/>
         </Box>
     )

@@ -1,19 +1,13 @@
-import { Typography, Box } from '@mui/material'
-import { Round } from '../model'
-import { formatTime } from '@/shared'
-import { useCountdown } from '@/shared'
+import {Box, Typography} from '@mui/material'
+import {formatTime} from '@/shared'
+import {useSelector} from "react-redux";
 
-interface RoundStatusProps {
-    round: Round
-    onStatusChange?: () => void
-}
 
-export function RoundStatus({ round, onStatusChange }: RoundStatusProps) {
-    const targetDate = round.status === 'active' ? round.endTime : round.startTime
-    const timeLeft = useCountdown(targetDate, onStatusChange)
+export function RoundStatus() {
+    const {stats, currentRound} = useSelector((state: any) => state.game) || {};
 
     const getStatusText = () => {
-        switch (round.status) {
+        switch (currentRound.status) {
             case 'active':
                 return 'Раунд активен!'
             case 'cooldown':
@@ -26,30 +20,40 @@ export function RoundStatus({ round, onStatusChange }: RoundStatusProps) {
     }
 
     const getTimeText = () => {
-        switch (round.status) {
+        switch (currentRound?.status) {
             case 'active':
-                return `До конца осталось: ${formatTime(timeLeft)}`
+                return `До конца осталось: ${formatTime(stats?.timeLeft || 0)}`
             case 'cooldown':
-                return `до начала раунда ${formatTime(timeLeft)}`
+                return `до начала раунда ${formatTime(stats?.timeRemaining || 0)}`
             default:
                 return ''
         }
     }
 
     return (
-        <Box sx={{ textAlign: 'center', mb: 3 }}>
-            <Typography variant="h5" sx={{ mb: 1 }}>
+        <Box sx={{textAlign: 'center', mb: 3}}>
+            <Typography variant="h5" sx={{mb: 1}}>
                 {getStatusText()}
             </Typography>
-            {(round.status === 'active' || round.status === 'cooldown') && (
+            {(currentRound?.status === 'active' || currentRound?.status === 'cooldown') && (
                 <Typography variant="h6" color="text.secondary">
                     {getTimeText()}
                 </Typography>
             )}
-            {round.status === 'active' && (
-                <Typography variant="h6" sx={{ mt: 1 }}>
-                    Мои очки - {round.myScore || 0}
+            {currentRound.status === 'active' && (
+                <Typography variant="h6" sx={{mt: 1}}>
+                    Мои очки - {stats?.myScore || 0}
                 </Typography>
+            )}
+            {currentRound.status === 'finished' && (
+                <>
+                    <Typography variant="h6" sx={{mt: 1}}>
+                        Всего - {stats.totalScore}
+                    </Typography>
+                    <Typography variant="h6" sx={{mt: 1}}>
+                        Победитель - {currentRound.winner.username} {currentRound.winner.score}
+                    </Typography>
+                </>
             )}
         </Box>
     )

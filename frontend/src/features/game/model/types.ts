@@ -1,4 +1,5 @@
 import { Round, RoundStats } from '@/entities'
+import {RoundBackend} from "@entities/round/model/types.ts";
 
 export interface GameState {
     currentRound: Round | null
@@ -9,11 +10,12 @@ export interface GameState {
 }
 
 export interface TapResponse {
-    myScore: number
-    myTaps: number
-    totalTaps: number
+    myScore: number;
+    myTaps: number;
+    totalTaps?: number;
+    totalScore?: number;
 }
 
 export interface RoundDetailsResponse {
-    data: Round
+    data: RoundBackend
 }
