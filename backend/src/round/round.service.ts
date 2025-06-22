@@ -80,8 +80,6 @@ export class RoundsService {
       startTime,
       endTime,
       status,
-      totalScore: 0,
-      totalTaps: 0,
     });
 
     const savedRound = await this.roundRepository.save(round);
@@ -100,7 +98,6 @@ export class RoundsService {
       startTime: round.startTime,
       endTime: round.endTime,
       status: this.calculateCurrentStatus(round),
-      totalScore: round.totalScore,
     }));
   }
 
@@ -153,25 +150,14 @@ export class RoundsService {
       createdAt: round.createdAt,
       startTime: round.startTime,
       endTime: round.endTime,
-      totalScore: round.totalScore,
-      totalTaps: round.totalTaps,
       status: this.calculateCurrentStatus(round),
     };
   }
 
   private calculateCurrentStatus(round: Round): RoundStatus {
     const now = new Date();
-    const cooldownDuration = this.configService.getOrThrow<number>(
-      'COOLDOWN_DURATION',
-      30,
-    );
-    const cooldownStartTime = new Date(
-      round.startTime.getTime() - cooldownDuration * 1000,
-    );
 
-    if (now < cooldownStartTime) {
-      return RoundStatus.SCHEDULED;
-    } else if (now < round.startTime) {
+    if (now < round.startTime) {
       return RoundStatus.COOLDOWN;
     } else if (now < round.endTime) {
       return RoundStatus.ACTIVE;

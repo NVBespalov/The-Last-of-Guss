@@ -9,7 +9,6 @@ import {
 import { RoundParticipation } from '@ThLOG/round/entities/round-participations.entity';
 
 export enum RoundStatus {
-  SCHEDULED = 'scheduled',
   COOLDOWN = 'cooldown',
   ACTIVE = 'active',
   FINISHED = 'finished',
@@ -28,12 +27,6 @@ export class Round {
 
   @Column({ type: 'timestamp' })
   endTime: Date;
-
-  @Column({ type: 'int', default: 0 })
-  totalScore: number;
-
-  @Column({ type: 'int', default: 0 })
-  totalTaps: number;
 
   @OneToMany(() => RoundParticipation, (participation) => participation.round)
   participations: RoundParticipation[];

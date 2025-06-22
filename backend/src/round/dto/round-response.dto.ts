@@ -5,8 +5,6 @@ export class RoundResponseDto {
   createdAt: Date;
   startTime: Date;
   endTime: Date;
-  totalScore: number;
-  totalTaps: number;
   status: RoundStatus;
   myScore?: number;
   myTaps?: number;
@@ -21,5 +19,4 @@ export class RoundListResponseDto {
   startTime: Date;
   endTime: Date;
   status: RoundStatus;
-  totalScore: number;
 }

@@ -124,7 +124,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.socketToUser.set(client.id, { userId, username });
 
     // Добавляем в комнату Socket.IO
-    client.join(`round-${roundId}`);
+    await client.join(`round-${roundId}`);
 
     // Отслеживаем пользователей в комнате
     if (!this.roomUsers.has(roundId)) {

@@ -1,47 +1,46 @@
-import React, { useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import React, {useEffect} from 'react';
+import {Controller, useForm} from 'react-hook-form';
+import {yupResolver} from '@hookform/resolvers/yup';
+import {useDispatch, useSelector} from 'react-redux';
+import {useNavigate} from 'react-router-dom';
 import {
-    Box,
-    TextField,
-    Button,
-    Typography,
-    Paper,
-    Grid,
     Alert,
-    InputAdornment,
+    Box,
+    Button,
+    CircularProgress,
     FormControl,
+    Grid,
+    InputAdornment,
     InputLabel,
     OutlinedInput,
-    CircularProgress,
+    Paper,
+    TextField,
+    Typography,
 } from '@mui/material';
-import {
-    AccessTime,
-} from '@mui/icons-material';
+import {AccessTime,} from '@mui/icons-material';
 
-import { roundFormSchema, type RoundFormData, type CreateRoundData } from '@/features';
-import { createRound, clearError, resetState } from '@/features';
-import { AppDispatch, RootState } from "@app/providers/store";
-// import {useRoundEvents} from "@features/round-management/lib/use-round-event.ts";
-import {ConnectionStatus} from "@/shared";
+import {
+    clearError,
+    createRound,
+    type CreateRoundData,
+    resetState,
+    type RoundFormData,
+    roundFormSchema
+} from '@/features';
+import {AppDispatch, RootState} from "@app/providers/store";
 
 
 export const CreateRoundForm: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
 
-    const { isCreating, error, createdRound } = useSelector((state: RootState) => state.createRound);
-    
-    // Подключаем WebSocket события
-    // const { isConnected } = useRoundEvents();
+    const {isCreating, error, createdRound} = useSelector((state: RootState) => state.createRound);
 
     const {
         handleSubmit,
         control,
         reset,
-        formState: { errors, isValid },
+        formState: {errors, isValid},
     } = useForm<RoundFormData>({
         resolver: yupResolver(roundFormSchema),
         defaultValues: {
@@ -87,9 +86,9 @@ export const CreateRoundForm: React.FC = () => {
     };
 
     return (
-        <Box sx={{ maxWidth: 800, mx: 'auto', p: 3 }}>
-            <Paper elevation={3} sx={{ p: 4 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
+        <Box sx={{maxWidth: 800, mx: 'auto', p: 3}}>
+            <Paper elevation={3} sx={{p: 4}}>
+                <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3}}>
                     <Box>
                         <Typography variant="h4" component="h1" gutterBottom>
                             Создание нового раунда
@@ -98,11 +97,10 @@ export const CreateRoundForm: React.FC = () => {
                             Заполните информацию для создания нового игрового раунда
                         </Typography>
                     </Box>
-                    <ConnectionStatus />
                 </Box>
 
                 {error && (
-                    <Alert severity="error" sx={{ mb: 3 }} onClose={() => dispatch(clearError())}>
+                    <Alert severity="error" sx={{mb: 3}} onClose={() => dispatch(clearError())}>
                         {error}
                     </Alert>
                 )}
@@ -114,7 +112,7 @@ export const CreateRoundForm: React.FC = () => {
                             <Controller
                                 name="startTime"
                                 control={control}
-                                render={({ field }) => (
+                                render={({field}) => (
                                     <TextField
                                         {...field}
                                         fullWidth
@@ -133,11 +131,11 @@ export const CreateRoundForm: React.FC = () => {
                             />
                         </Grid>
 
-                        <Grid component="div" sx={{ mb: 2, width: '48%' }}>
+                        <Grid component="div" sx={{mb: 2, width: '48%'}}>
                             <Controller
                                 name="duration"
                                 control={control}
-                                render={({ field }) => (
+                                render={({field}) => (
                                     <FormControl fullWidth error={!!errors.duration}>
                                         <InputLabel htmlFor="duration-input">Продолжительность</InputLabel>
                                         <OutlinedInput
@@ -152,7 +150,7 @@ export const CreateRoundForm: React.FC = () => {
                                             }}
                                             startAdornment={
                                                 <InputAdornment position="start">
-                                                    <AccessTime />
+                                                    <AccessTime/>
                                                 </InputAdornment>
                                             }
                                             endAdornment={
@@ -160,7 +158,7 @@ export const CreateRoundForm: React.FC = () => {
                                             }
                                         />
                                         {errors.duration && (
-                                            <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.5 }}>
+                                            <Typography variant="caption" color="error" sx={{mt: 0.5, ml: 1.5}}>
                                                 {errors.duration.message}
                                             </Typography>
                                         )}
@@ -168,8 +166,8 @@ export const CreateRoundForm: React.FC = () => {
                                 )}
                             />
                         </Grid>
-                        <Grid component="div" sx={{ mb: 2, width: '100%' }}>
-                            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 2 }}>
+                        <Grid component="div" sx={{mb: 2, width: '100%'}}>
+                            <Box sx={{display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 2}}>
                                 <Button
                                     variant="outlined"
                                     onClick={handleCancel}
@@ -183,8 +181,8 @@ export const CreateRoundForm: React.FC = () => {
                                     variant="contained"
                                     disabled={!isValid || isCreating}
                                     size="large"
-                                    sx={{ minWidth: 120 }}
-                                    startIcon={isCreating ? <CircularProgress size={20} color="inherit" /> : undefined}
+                                    sx={{minWidth: 120}}
+                                    startIcon={isCreating ? <CircularProgress size={20} color="inherit"/> : undefined}
                                 >
                                     {isCreating ? 'Создание...' : 'Создать раунд'}
                                 </Button>
