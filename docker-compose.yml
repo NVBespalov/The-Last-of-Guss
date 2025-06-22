@@ -47,7 +47,6 @@ services:
       - WS_CORS_ORIGIN=${WS_CORS_ORIGIN}
     ports:
       - "${PORT:-3000}:${PORT}"
-  #      - "${WS_PORT:-3001}:${WS_PORT}"
 
   pgadmin:
     image: dpage/pgadmin4
@@ -134,9 +133,25 @@ services:
     ports:
       - "9093:9093"
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "80:80"  # Маппинг порта 3000 хоста на порт 80 контейнера
+    volumes:
+      - ./frontend:/app  # Для разработки (опционально)
+      - /app/node_modules  # Исключаем node_modules из монтирования
+    restart: unless-stopped
+    depends_on:
+      - backend
+
+
 volumes:
   postgres_data:
   prometheus_data:
   grafana_data:
   elasticsearch_data:
   alertmanager_data:
+  frontend:

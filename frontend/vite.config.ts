@@ -7,6 +7,13 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    build: {
+      chunkSizeWarningLimit: 2000,
+      rollupOptions: {
+        external: ['@socket.io/component-emitter']
+      },
+      outDir: 'build',
+    },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
@@ -16,7 +23,11 @@ export default defineConfig(({ mode }) => {
         '@features': path.resolve(__dirname, './src/features'),
         '@entities': path.resolve(__dirname, './src/entities'),
         '@shared': path.resolve(__dirname, './src/shared'),
+        '@socket.io/component-emitter': '/node_modules/@socket.io/component-emitter/index.js'
       },
+    },
+    optimizeDeps: {
+      include: ['socket.io-client', '@socket.io/component-emitter']
     },
     server: {
       port: parseInt(env.VITE_PORT) || 3000,

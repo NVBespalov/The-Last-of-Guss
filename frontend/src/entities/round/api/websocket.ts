@@ -44,18 +44,25 @@ export const roundWebSocketApi = {
 
     // Операции с раундами через WebSocket
     joinRound(roundId: string) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
         websocketService.emit('round:join', { roundId });
     },
-
     leaveRound(roundId: string) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
         websocketService.emit('round:leave', { roundId });
     },
 
     subscribeToRound(roundId: string) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
         websocketService.emit('round:subscribe', { roundId });
     },
 
     unsubscribeFromRound(roundId: string) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
         websocketService.emit('round:unsubscribe', { roundId });
     },
 };

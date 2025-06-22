@@ -1,4 +1,3 @@
-import React from 'react'
 import { TextField, TextFieldProps } from '@mui/material'
 
 interface InputProps extends Omit<TextFieldProps, 'variant'> {

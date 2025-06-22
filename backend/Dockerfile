@@ -43,7 +43,6 @@ USER nestjs
 
 # Открываем порты
 EXPOSE 3000
-EXPOSE 3001
 
 # Запускаем приложение
 CMD ["node", "--experimental-global-webcrypto", "dist/main"]
