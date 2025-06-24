@@ -120,21 +120,13 @@ export class AuthController {
     description: 'Недействительный или истекший refresh токен',
   })
   async refreshTokens(@Body() refreshTokenDto: RefreshTokenDto) {
-    try {
-      // Декодируем refresh token для получения userId и username
-      const decoded = (await this.authService.verifyToken(
-        refreshTokenDto.refreshToken,
-      )) as JwtPayload;
-
-      // Обновляем токены
-      return this.authService.refreshTokens(
-        decoded.sub,
-        refreshTokenDto.refreshToken,
-      );
-    } catch (error) {
-      // Ошибки будут обработаны глобальным фильтром исключений
-      throw error;
-    }
+    const decoded = (await this.authService.verifyToken(
+      refreshTokenDto.refreshToken,
+    )) as JwtPayload;
+    return this.authService.refreshTokens(
+      decoded.sub,
+      refreshTokenDto.refreshToken,
+    );
   }
 
   @Post('logout')

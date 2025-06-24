@@ -1,12 +1,15 @@
 import { Navigate } from 'react-router-dom'
-import { useAppSelector } from '../../../shared/lib'
-import { RoundsList } from '../../../widgets/rounds-list'
+import { useAppSelector } from '@/shared'
+import { RoundsList } from '@/widgets'
 
 export function RoundsPage() {
-    const { isAuthenticated, loading } = useAppSelector((state) => state.auth)
+    const { isAuthenticated, loading, error } = useAppSelector((state) => state.auth)
 
     if (loading) {
-        return null // или компонент загрузки
+        return null
+    }
+    if (error) {
+        return <Navigate to="/login" replace />
     }
 
     if (!isAuthenticated) {

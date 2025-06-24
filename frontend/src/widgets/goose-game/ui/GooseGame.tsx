@@ -1,6 +1,7 @@
 import {Alert, Box} from '@mui/material'
 import {useAppSelector, useRoundManager} from '@/shared'
 import {Round} from '@/entities'
+import {RootState} from "@app/providers/store";
 
 interface GooseGameProps {
     round: Round
@@ -20,10 +21,11 @@ const GooseArt = `            ░░░░░░░░░░░░░░░
         ░░░░░░░░░░░░░░░░░░░░░░░░░░`
 
 export function GooseGame({ round }: GooseGameProps) {
-    const { tapping, error, } = useAppSelector((state) => {
+    const { tapping, error, } = useAppSelector((state: RootState) => {
         return {...state.game};
     })
     const {tap} = useRoundManager(round)
+
     const isClickable = round?.status === 'active' && !tapping
 
     return (

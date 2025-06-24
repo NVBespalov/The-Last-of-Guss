@@ -16,9 +16,6 @@ import { RedisCacheService } from '@ThLOG/redis/redis-cache.service';
 export interface TapResult {
   userId: string;
   roundId: string;
-  taps: number;
-  score: number;
-  pointsEarned: number;
   message?: string;
 }
 
@@ -56,7 +53,7 @@ export class TapService {
   }
 
   // Запись клика в журнал (быстрая операция)
-  async recordTap(userId: string, roundId: string): Promise<TapResult> {
+  async recordTap(userId: string, roundId: string): Promise<boolean> {
     try {
       // Проверяем активность раунда (кэшируем результат)
       const roundKey = `round:${roundId}`;
@@ -90,35 +87,24 @@ export class TapService {
         throw new BadRequestException('Пользователь не найден');
       }
 
-      const isNikita = user.role === UserRole.NIKITA;
+      // const isNikita = user.role === UserRole.NIKITA;
 
       // Получаем текущую статистику пользователя
       const statsKey = `stats:${userId}:${roundId}`;
-      const userStats = await this.cacheService.getOrSet<{
-        taps: number;
-        score: number;
-      }>(
-        statsKey,
-        () => this.getUserStats(userId, roundId),
-        10, // TTL 10 секунд
-      );
-
-      // Определяем, сколько очков начислить
-      let pointsToAdd = 1;
-      // Каждый 11-й клик дает 10 очков
-      if ((userStats.taps + 1) % 11 === 0) {
-        pointsToAdd = 10;
-      }
-
-      // Если пользователь - Никита, очки не начисляются
-      const actualPointsToAdd = isNikita ? 0 : pointsToAdd;
+      // const userStats = await this.cacheService.getOrSet<{
+      //   taps: number;
+      //   score: number;
+      // }>(
+      //   statsKey,
+      //   () => this.getUserStats(userId, roundId),
+      //   10, // TTL 10 секунд
+      // );
 
       // Создаем запись в журнале
       const tapLog = this.tapLogRepository.create({
         userId,
         roundId,
         timestamp: now,
-        pointsEarned: actualPointsToAdd,
       });
 
       // Сохраняем запись в журнале
@@ -128,16 +114,7 @@ export class TapService {
       await this.cacheService.del(statsKey);
 
       // Возвращаем результат
-      return {
-        userId,
-        roundId,
-        taps: userStats.taps + 1,
-        score: userStats.score + actualPointsToAdd,
-        pointsEarned: actualPointsToAdd,
-        message: isNikita
-          ? 'Клик засчитан, но очки не начислены (роль Никита)'
-          : undefined,
-      };
+      return true;
     } catch (error) {
       this.logger.error(
         `Ошибка при записи клика: ${error.message}`,
@@ -262,21 +239,10 @@ export class TapService {
     const totalTaps = taps.length;
     let totalScore = 0;
 
-    for (let i = 0; i < totalTaps; i++) {
-      // Правило начисления очков
-      const points = (i + 1) % 11 === 0 ? 10 : 1;
-
-      // Обновляем pointsEarned в записи, если нужно
-      if (taps[i].pointsEarned === 0) {
-        taps[i].pointsEarned = isNikita ? 0 : points;
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-        await manager.save(taps[i]);
-      }
-
-      // Если пользователь не Никита, считаем очки
-      if (!isNikita) {
-        totalScore += taps[i].pointsEarned;
-      }
+    if (!isNikita) {
+      totalScore = totalTaps;
+      const bonusTaps = Math.floor(totalTaps / 11);
+      totalScore += bonusTaps * 10;
     }
 
     // Обновляем запись участия

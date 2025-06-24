@@ -2,7 +2,7 @@ export interface Round {
     id?: string
     startTime: Date | string;
     endTime: Date | string;
-    status: 'cooldown' | 'active' | 'finished'
+    status: RoundStatus
     winner?: {
         username: string
         score: number
@@ -10,7 +10,7 @@ export interface Round {
 }
 export interface RoundBackend {
     id: string;
-    status: 'cooldown' | 'active' | 'finished'
+    status: RoundStatus
     startTime: string
     endTime: string
     myScore: number;
@@ -24,15 +24,21 @@ export interface RoundBackend {
 }
 
 export interface RoundStats {
-    myTaps: number
-    myScore: number
-    timeLeft: number;
-    timeRemaining: number;
     totalTaps: number;
     totalScore: number;
 }
 
-export type RoundStatus = 'active' | 'cooldown' | 'finished';
+export interface RoundMyStats {
+    taps: number;
+    score: number;
+}
+
+
+export enum RoundStatus {
+    ACTIVE = 'active',
+    COOLDOWN = 'cooldown',
+    FINISHED = 'finished'
+}
 
 
 export interface RoundUpdate {

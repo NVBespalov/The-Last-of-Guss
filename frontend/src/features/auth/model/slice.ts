@@ -5,7 +5,7 @@ import {User} from "@/entities";
 
 const initialState: AuthState = {
     user: null,
-    isAuthenticated: false,
+    isAuthenticated: localStorage.getItem('token') !== null,
     loading: false,
     error: null,
 }
@@ -39,11 +39,12 @@ export const checkAuth = createAsyncThunk(
     'auth/checkAuth',
     async (_, { rejectWithValue }) => {
         try {
-            const token = localStorage.getItem('token')
+            const token = localStorage.getItem('token');
+
             if (!token) {
                 throw new Error('No token')
             }
-            return await authApi.getMe()
+            return await authApi.getMe();
         } catch (error: any) {
             localStorage.removeItem('token')
             return rejectWithValue('Не авторизован')

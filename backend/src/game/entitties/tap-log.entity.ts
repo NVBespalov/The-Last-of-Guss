@@ -16,9 +16,6 @@ export class TapLog {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   timestamp: Date;
 
-  @Column({ default: 0 })
-  pointsEarned: number;
-
   @ManyToOne(() => User)
   user: User;
 

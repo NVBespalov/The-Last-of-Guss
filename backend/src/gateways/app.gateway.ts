@@ -242,7 +242,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   // Основной обработчик тапов через WebSocket
   @SubscribeMessage('tap')
-  async handleTap(
+  handleTap(
     @MessageBody() data: { roundId: string },
     @ConnectedSocket() client: Socket,
   ) {
@@ -258,7 +258,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const { userId, username } = userInfo;
 
       // Выполняем тап через сервис
-      const tapResult = await this.tapService.recordTap(userId, roundId);
+      // const tapResult = await this.tapService.recordTap(userId, roundId);
 
       // Отправляем результат тапа самому пользователю
       client.emit('tap-result', {
@@ -267,8 +267,8 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
         userId,
         username,
         tapResult: {
-          score: tapResult.score,
-          totalTaps: tapResult.taps,
+          // score: tapResult.score,
+          // totalTaps: tapResult.taps,
           // roundTotalTaps: tapResult.roundTotalTaps,
           // roundTotalScore: tapResult.roundTotalScore
         },

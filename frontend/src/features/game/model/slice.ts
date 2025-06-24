@@ -1,12 +1,21 @@
 import {createAsyncThunk, createSlice, PayloadAction} from '@reduxjs/toolkit'
 import {GameState, RoundDetailsResponse, TapResponse} from './types'
 import {gameApi} from '../api'
-import {RoundTimeUpdate, RoundUpdate} from "@entities/round/model/types.ts";
+
 
 const initialState: GameState = {
     currentRound: null,
-    stats: null,
-    loading: false,
+    myStats: {
+        taps: 0,
+        score: 0,
+    },
+    roundStats: {
+        totalScore: 0,
+        totalTaps: 0,
+    },
+    roundDetailsLoading: false,
+    roundStatsLoading: false,
+    myRoundStatsLoading: false,
     error: null,
     tapping: false,
 }
@@ -32,6 +41,28 @@ export const tapGoose = createAsyncThunk<TapResponse, string>(
         }
     }
 )
+export const fetchRoundStatistics = createAsyncThunk(
+    'game/fetchRoundStatistics',
+    async (roundId: string, {rejectWithValue}) => {
+        try {
+            const response = await gameApi.getRoundStatistic(roundId);
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Ошибка при получении статистики');
+        }
+    }
+);
+export const fetchRoundMyStatistics = createAsyncThunk(
+    'game/fetchRoundMyStatistics',
+    async (roundId: string, {rejectWithValue}) => {
+        try {
+            const response = await gameApi.getRoundMyStatistic(roundId);
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Ошибка при получении статистики');
+        }
+    }
+);
 
 
 export const gameSlice = createSlice({
@@ -43,50 +74,23 @@ export const gameSlice = createSlice({
         },
         clearCurrentRound: (state) => {
             state.currentRound = null
-            state.stats = null
-        },
-        updateRoundFromSocket: (state, {
-            payload: {
-                leaderboard,
-                myScore,
-                totalScore,
-                totalTaps,
-                myTaps,
-                timeRemaining,
-                timeLeft,
-                winner,
-                ...payload
+            state.myStats = {
+                taps: 0,
+                score: 0,
             }
-        }: PayloadAction<RoundUpdate>) => {
-
-            if (state.currentRound) {
-                state.currentRound = {
-                    ...state.currentRound,
-                    status: payload.status || state.currentRound.status,
-                    winner: winner || state.currentRound.winner,
-                    endTime: payload.endTime || state.currentRound.endTime,
-                    startTime: payload.startTime || state.currentRound.startTime,
-                }
-                state.stats = {
-                    myTaps: myTaps || state.stats?.myTaps || 0,
-                    myScore: myScore || state.stats?.myScore || 0,
-                    totalScore: totalScore || state.stats?.totalScore || 0,
-                    totalTaps: totalTaps || state.stats?.totalTaps || 0,
-                    timeRemaining: timeRemaining || state.stats?.timeRemaining || 0,
-                    timeLeft: timeLeft || state.stats?.timeLeft || 0,
-                }
-
+            state.roundStats = {
+                totalScore: 0,
+                totalTaps: 0,
             }
+
         },
-        updateTimeFromSocket: (state, {payload: {timeRemaining = 0, timeLeft = 0}}: PayloadAction<RoundTimeUpdate>) => {
-            if (state.currentRound) {
-                state.stats = {
-                    myScore: state.stats?.myScore || 0,
-                    myTaps: state.stats?.myTaps || 0,
-                    totalScore: state.stats?.totalScore || 0,
-                    totalTaps: state.stats?.totalTaps || 0,
-                    timeRemaining: timeRemaining || state.stats?.timeRemaining || 0,
-                    timeLeft: timeLeft || state.stats?.timeLeft || 0,
+        incrementLocalTapCount: (state) => {
+            if (state.myStats) {
+                state.myStats.taps += 1;
+            } else {
+                state.myStats = {
+                    taps: 1,
+                    score: 0,
                 }
             }
         },
@@ -96,42 +100,22 @@ export const gameSlice = createSlice({
             builder
                 // Fetch round details
                 .addCase(fetchRoundDetails.pending, (state) => {
-                    state.loading = true
+                    state.roundDetailsLoading = true
                     state.error = null
                 })
                 .addCase(fetchRoundDetails.fulfilled, (state, action: PayloadAction<RoundDetailsResponse>) => {
-                    state.loading = false
-                    const {
-                        myTaps,
-                        myScore,
-                        totalScore,
-                        totalTaps,
-                        status,
-                        id,
-                        startTime,
-                        endTime,
-                        winner,
-                    } = action.payload.data;
+                    state.roundDetailsLoading = false
                     state.currentRound = {
-                        ...state.currentRound ?? {},
-                        id: id,
-                        status: status,
-                        endTime,
-                        startTime,
-                        winner: winner,
-                    };
-                    state.stats = {
-                        ...state.stats,
-                        myTaps,
-                        myScore,
-                        totalScore,
-                        totalTaps,
-                        timeLeft: 0,
-                        timeRemaining: 0
-                    };
+                        ...state.currentRound,
+                        id: action.payload.data.id,
+                        startTime: action.payload.data.startTime,
+                        endTime: action.payload.data.endTime,
+                        status: action.payload.data.status,
+                        winner: action.payload.data.winner,
+                    }
                 })
                 .addCase(fetchRoundDetails.rejected, (state, action) => {
-                    state.loading = false
+                    state.roundDetailsLoading = false
                     state.error = action.payload as string
                 })
                 // Tap goose
@@ -139,19 +123,40 @@ export const gameSlice = createSlice({
                     state.tapping = true
                     state.error = null
                 })
-                .addCase(tapGoose.fulfilled, (state, action: PayloadAction<TapResponse>) => {
+                .addCase(tapGoose.fulfilled, (state) => {
                     state.tapping = false
-
-                    if (state.stats) {
-                        state.stats.myScore = action.payload.myScore
-                        state.stats.myTaps = action.payload.myTaps
-                        // state.stats.totalTaps = action.payload.totalTaps
-                    }
                 })
                 .addCase(tapGoose.rejected, (state, action) => {
                     state.tapping = false
                     state.error = action.payload as string
                 })
+                // Обработка получения статистики
+                .addCase(fetchRoundStatistics.pending, (state) => {
+                    state.error = null;
+                    state.roundStatsLoading = true;
+                })
+                .addCase(fetchRoundStatistics.fulfilled, (state, action) => {
+                    state.roundStats = action.payload;
+                    state.roundStatsLoading = false;
+                })
+                .addCase(fetchRoundStatistics.rejected, (state, action) => {
+                    state.error = action.payload as string || 'Ошибка при получении статистики';
+                    state.roundStatsLoading = false;
+                })
+                // Обработка получения собственной статистики
+                .addCase(fetchRoundMyStatistics.pending, (state) => {
+                    state.myRoundStatsLoading = true;
+                    state.error = null;
+                })
+                .addCase(fetchRoundMyStatistics.fulfilled, (state, action) => {
+                    state.myRoundStatsLoading = false;
+                    state.myStats = action.payload;
+                })
+                .addCase(fetchRoundMyStatistics.rejected, (state, action) => {
+                    state.myRoundStatsLoading = false;
+                    state.error = action.payload as string || 'Ошибка при получении статистики';
+                });
+
         },
 
 
@@ -160,6 +165,5 @@ export const gameSlice = createSlice({
 export const {
     clearError: clearErrorGame,
     clearCurrentRound,
-    updateRoundFromSocket,
-    updateTimeFromSocket
+    incrementLocalTapCount,
 } = gameSlice.actions

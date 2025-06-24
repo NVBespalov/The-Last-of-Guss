@@ -1,8 +1,8 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
-import { LoginPage } from '../../../pages/login'
-import { RoundsPage } from '../../../pages/rounds'
-import { RoundPage } from '../../../pages/round'
-import { Layout } from '../../../shared/ui/Layout'
+import { LoginPage } from '@/pages'
+import { RoundsPage } from '@/pages'
+import { RoundPage } from '@/pages'
+import { Layout } from '@/shared'
 import {CreateRoundPage} from "@/pages";
 
 export const router = createBrowserRouter([

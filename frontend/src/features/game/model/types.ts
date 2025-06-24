@@ -1,10 +1,13 @@
-import { Round, RoundStats } from '@/entities'
-import {RoundBackend} from "@entities/round/model/types.ts";
+import {Round, RoundStats} from '@/entities'
+import {RoundBackend, RoundMyStats} from "@entities/round/model/types.ts";
 
 export interface GameState {
     currentRound: Round | null
-    stats: RoundStats | null
-    loading: boolean
+    roundStats: RoundStats | null
+    myStats: RoundMyStats
+    roundDetailsLoading: boolean
+    roundStatsLoading: boolean
+    myRoundStatsLoading: boolean
     error: string | null
     tapping: boolean
 }
@@ -18,4 +21,12 @@ export interface TapResponse {
 
 export interface RoundDetailsResponse {
     data: RoundBackend
+}
+
+export interface RoundStatisticResponse {
+    data: RoundStats
+}
+
+export interface RoundMyStatisticResponse {
+    data: RoundMyStats
 }

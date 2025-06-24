@@ -1,18 +1,18 @@
 import {
   Controller,
-  Post,
   Get,
   Param,
-  UseGuards,
+  Post,
   Request,
+  UseGuards,
 } from '@nestjs/common';
 import {
-  ApiTags,
+  ApiBearerAuth,
   ApiOperation,
   ApiResponse,
-  ApiBearerAuth,
+  ApiTags,
 } from '@nestjs/swagger';
-import { TapService, TapResult } from './tap.service';
+import { TapService } from './tap.service';
 import { JwtAuthGuard } from '@ThLOG/auth/guards';
 
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -22,13 +22,13 @@ import { RolesGuard } from '@ThLOG/auth/guards/roles.guard';
 @ApiTags('game')
 @Controller('game')
 @UseGuards(JwtAuthGuard)
-@ApiBearerAuth()
+@ApiBearerAuth('JWT-auth')
 export class GameController {
   constructor(private readonly tapService: TapService) {}
 
   @Post('rounds/:roundId/tap')
   @UseGuards(RolesGuard)
-  @Roles(UserRole.SURVIVOR, UserRole.NIKITA)
+  @Roles(UserRole.SURVIVOR, UserRole.NIKITA, UserRole.ADMIN)
   @ApiOperation({ summary: 'Тап по гусю в раунде' })
   @ApiResponse({ status: 200, description: 'Тап успешно обработан' })
   @ApiResponse({
@@ -38,7 +38,7 @@ export class GameController {
   async tapGoose(
     @Param('roundId') roundId: string,
     @Request() req: any,
-  ): Promise<TapResult> {
+  ): Promise<boolean> {
     return await this.tapService.recordTap(req.user.id, roundId);
   }
 
@@ -50,6 +50,17 @@ export class GameController {
     @Request() req: any,
   ): Promise<{ taps: number; score: number }> {
     return await this.tapService.getUserStats(req.user.id, roundId);
+  }
+
+  @Get('rounds/:roundId/stats')
+  @ApiOperation({ summary: 'Получить статистику раунда' })
+  @ApiResponse({ status: 200, description: 'Статистика раунда' })
+  getRoundStats(@Param('roundId') roundId: string): Promise<{
+    totalTaps: number;
+    totalScore: number;
+    isComplete: boolean;
+  }> {
+    return this.tapService.getRoundStats(roundId);
   }
 
   @Get('rounds/:roundId/leaderboard')

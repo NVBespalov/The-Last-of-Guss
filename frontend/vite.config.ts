@@ -1,4 +1,4 @@
-import { defineConfig, loadEnv } from 'vite'
+import {defineConfig, loadEnv} from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 
@@ -9,9 +9,6 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     build: {
       chunkSizeWarningLimit: 2000,
-      rollupOptions: {
-        external: ['@socket.io/component-emitter']
-      },
       outDir: 'build',
     },
     resolve: {
@@ -23,7 +20,6 @@ export default defineConfig(({ mode }) => {
         '@features': path.resolve(__dirname, './src/features'),
         '@entities': path.resolve(__dirname, './src/entities'),
         '@shared': path.resolve(__dirname, './src/shared'),
-        '@socket.io/component-emitter': '/node_modules/@socket.io/component-emitter/index.js'
       },
     },
     optimizeDeps: {

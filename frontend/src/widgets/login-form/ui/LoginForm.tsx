@@ -3,7 +3,7 @@ import {useForm} from 'react-hook-form'
 import {yupResolver} from '@hookform/resolvers/yup'
 import {Box, Paper, Typography, Alert} from '@mui/material'
 import {useNavigate} from 'react-router-dom'
-import {useAppDispatch, useAppSelector, useWebSocket} from '@/shared'
+import {useAppDispatch, useAppSelector} from '@/shared'
 import {loginUser, clearError} from '@/features'
 import {loginSchema, LoginFormData} from '@/features'
 import {Input, Button} from '@/shared'
@@ -11,8 +11,7 @@ import {Input, Button} from '@/shared'
 export function LoginForm() {
     const dispatch = useAppDispatch()
     const navigate = useNavigate()
-    const {loading, error, isAuthenticated} = useAppSelector((state) => state.auth)
-    const {reconnect} = useWebSocket()
+    const {loading, error} = useAppSelector((state) => state.auth)
     const {
         register,
         handleSubmit,
@@ -20,12 +19,6 @@ export function LoginForm() {
     } = useForm<LoginFormData>({
         resolver: yupResolver(loginSchema),
     })
-
-    useEffect(() => {
-        if (isAuthenticated) {
-            navigate('/rounds')
-        }
-    }, [isAuthenticated, navigate])
 
     useEffect(() => {
         return () => {
@@ -39,7 +32,8 @@ export function LoginForm() {
         // Проверяем статус выполнения
         if (loginUser.fulfilled.match(resultAction)) {
             // Действие успешно выполнено, можно продолжать
-            await reconnect();
+            navigate('/rounds');
+
         } else if (loginUser.rejected.match(resultAction)) {
             // Действие завершилось с ошибкой
             console.error('Ошибка входа:', resultAction.payload);

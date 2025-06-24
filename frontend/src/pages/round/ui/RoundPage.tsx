@@ -2,16 +2,16 @@ import {useEffect} from 'react'
 import {Link, Navigate, useParams} from 'react-router-dom'
 import {Alert, Box, Button, CircularProgress} from '@mui/material'
 import {ArrowBack as ArrowBackIcon} from '@mui/icons-material'
-import {ConnectionStatus, useAppDispatch, useAppSelector, useRoundManager} from '@/shared'
+import {useAppDispatch, useAppSelector} from '@/shared'
 import {clearCurrentRound, fetchRoundDetails} from '@/features'
-import {Round, RoundStatus} from '@/entities'
+import {RoundStatus} from '@/entities'
 import {GooseGame} from '@/widgets'
 
 export function RoundPage() {
     const {id} = useParams<{ id: string }>()
     const dispatch = useAppDispatch()
     const {isAuthenticated, loading: authLoading} = useAppSelector((state) => state.auth)
-    const {currentRound, loading, error} = useAppSelector((state) => state.game)
+    const {currentRound, error, roundDetailsLoading} = useAppSelector((state) => state.game)
 
     useEffect(() => {
         if (id && isAuthenticated) {
@@ -22,18 +22,6 @@ export function RoundPage() {
             dispatch(clearCurrentRound())
         }
     }, [dispatch, id, isAuthenticated]);
-
-    const {
-        joinRound,
-        leaveRound,
-    } = useRoundManager(currentRound || {} as Round)
-
-    useEffect(() => {
-        joinRound()
-        return () => {
-            leaveRound()
-        }
-    }, [joinRound, leaveRound, currentRound]);
 
     if (authLoading) {
         return null
@@ -47,7 +35,7 @@ export function RoundPage() {
         return <Navigate to="/rounds" replace/>
     }
 
-    if (loading && !currentRound) {
+    if (roundDetailsLoading && !currentRound) {
         return (
             <Box sx={{display: 'flex', justifyContent: 'center', mt: 4}}>
                 <CircularProgress/>
@@ -103,8 +91,7 @@ export function RoundPage() {
                     Раунды
                 </Button>
             </Box>
-            <ConnectionStatus/>
-            <RoundStatus />
+            <RoundStatus/>
             <GooseGame round={currentRound}/>
         </Box>
     )
