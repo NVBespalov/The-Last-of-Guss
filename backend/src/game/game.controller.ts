@@ -39,7 +39,7 @@ export class GameController {
     @Param('roundId') roundId: string,
     @Request() req: any,
   ): Promise<TapResult> {
-    return await this.tapService.processTap(req.user.id, roundId);
+    return await this.tapService.recordTap(req.user.id, roundId);
   }
 
   @Get('rounds/:roundId/my-stats')

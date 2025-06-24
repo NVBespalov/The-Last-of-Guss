@@ -116,7 +116,7 @@ export class RoundTimerService implements OnModuleInit, OnModuleDestroy {
 
     // Отправляем обновление статистики
     try {
-      await this.tapService.forceRoundStatsUpdate(roundId);
+      await this.tapService.forceRecalculateRoundStats(roundId);
     } catch (error) {
       console.error('Error updating round stats on start:', error);
     }
@@ -136,7 +136,7 @@ export class RoundTimerService implements OnModuleInit, OnModuleDestroy {
       });
 
       // Отправляем финальную статистику
-      await this.tapService.forceRoundStatsUpdate(roundId);
+      await this.tapService.forceRecalculateRoundStats(roundId);
     } catch (error) {
       console.error('Error handling round end:', error);
     }

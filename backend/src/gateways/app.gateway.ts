@@ -21,6 +21,7 @@ interface RoomUser {
   username: string;
   joinedAt: Date;
 }
+
 @Injectable()
 @WebSocketGateway({
   cors: {
@@ -42,10 +43,8 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private prometheusService: PrometheusService,
     @Inject(forwardRef(() => TapService))
     private tapService: TapService,
-
     @Inject(forwardRef(() => RoundsService))
     private roundService: RoundsService,
-
     @Inject(forwardRef(() => AuthService))
     private readonly authService: AuthService,
   ) {}
@@ -158,14 +157,14 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   // Покидание комнаты раунда
   @SubscribeMessage('leave-round')
-  handleLeaveRound(
+  async handleLeaveRound(
     @MessageBody() data: { roundId: string; userId: string },
     @ConnectedSocket() client: Socket,
   ) {
     const { roundId, userId } = data;
     const userInfo = this.socketToUser.get(client.id);
 
-    client.leave(`round-${roundId}`);
+    await client.leave(`round-${roundId}`);
 
     if (this.roomUsers.has(roundId)) {
       const roomUserMap = this.roomUsers.get(roundId)!;
@@ -186,11 +185,9 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   // Запрос статистики раунда
   @SubscribeMessage('request-round-stats')
-  handleRequestRoundStats(
-    @MessageBody() data: { roundId: string },
-    @ConnectedSocket() client: Socket,
-  ) {
-    const { roundId } = data;
+  handleRequestRoundStats() {
+    // @ConnectedSocket() client: Socket, // @MessageBody() data: { roundId: string },
+    // const { roundId } = data;
     // Здесь можно вызвать TapService для получения актуальной статистики
     // Но лучше это делать через инжекцию зависимостей в методе обновления
   }
@@ -261,7 +258,7 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const { userId, username } = userInfo;
 
       // Выполняем тап через сервис
-      const tapResult = await this.tapService.processTap(userId, roundId);
+      const tapResult = await this.tapService.recordTap(userId, roundId);
 
       // Отправляем результат тапа самому пользователю
       client.emit('tap-result', {

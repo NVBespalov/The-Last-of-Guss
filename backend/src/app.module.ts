@@ -13,6 +13,8 @@ import { CommonModule } from '@ThLOG/common/common.module';
 import { TimerModule } from '@ThLOG/common/timer/timer.module';
 import { WebSocketModule } from '@ThLOG/gateways/web-socket.module';
 import { AppGateway } from '@ThLOG/gateways';
+import { LocksModule } from '@ThLOG/lock/lock.module';
+import { RedisModule } from '@ThLOG/redis/redis.module';
 
 @Module({
   imports: [
@@ -24,6 +26,8 @@ import { AppGateway } from '@ThLOG/gateways';
     HealthModule,
     AuthModule,
     RoundsModule,
+    RedisModule,
+    LocksModule,
     GameModule,
     TimerModule,
     WebSocketModule,

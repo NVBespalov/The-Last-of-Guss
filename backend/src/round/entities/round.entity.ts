@@ -42,6 +42,9 @@ export class Round {
     }
   }
 
+  @Column({ default: false })
+  calculationComplete: boolean;
+
   @UpdateDateColumn()
   updatedAt: Date;
 }

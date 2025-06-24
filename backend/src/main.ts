@@ -3,7 +3,7 @@ import { AppModule } from '@ThLOG//app.module';
 import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpExceptionFilter } from '@ThLOG/common/filters';
-import { Response, Request } from 'express';
+import { Request, Response } from 'express';
 import {
   TransformInterceptor,
   TypeOrmExceptionFilter,
@@ -17,7 +17,6 @@ import {
 import { winstonLogger } from '@ThLOG/common/logger/winston.logger';
 import { PrometheusService } from '@ThLOG/common/metrics/prometheus.service';
 import { MetricsInterceptor } from '@ThLOG/common/interceptors/metrics.interceptor';
-import { CustomIoAdapter } from '@ThLOG/gateways/io-adapter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -66,7 +65,7 @@ async function bootstrap() {
 
   // Получение порта из конфигурации
   const port = configService.getOrThrow<number>('port');
-  app.useWebSocketAdapter(new CustomIoAdapter(app));
+  // app.useWebSocketAdapter(new CustomIoAdapter(app));
 
   await app.listen(port);
   console.log(`Приложение запущено на порту: ${port}`);
