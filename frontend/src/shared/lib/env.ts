@@ -1,7 +1,7 @@
 export const env = {
     PORT: parseInt(import.meta.env.VITE_PORT) || 3000,
     HOST: import.meta.env.VITE_HOST === 'true',
-    API_BASE_URL: import.meta.env.DEV  ? '/api' : (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api'),
+    API_BASE_URL: '/api/',
     JWT_SECRET: import.meta.env.VITE_JWT_SECRET || 'default-secret',
     JWT_EXPIRES_IN: import.meta.env.VITE_JWT_EXPIRES_IN || '24h',
     APP_NAME: import.meta.env.VITE_APP_NAME || 'MyApp',

@@ -48,6 +48,8 @@ export const fetchRoundStatistics = createAsyncThunk(
             const response = await gameApi.getRoundStatistic(roundId);
             return response.data;
         } catch (error) {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
             return rejectWithValue(error.response?.data?.message || 'Ошибка при получении статистики');
         }
     }
@@ -59,6 +61,8 @@ export const fetchRoundMyStatistics = createAsyncThunk(
             const response = await gameApi.getRoundMyStatistic(roundId);
             return response.data;
         } catch (error) {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
             return rejectWithValue(error.response?.data?.message || 'Ошибка при получении статистики');
         }
     }
